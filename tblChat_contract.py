@@ -304,3 +304,53 @@ def deletetblChatMessage1(json_data: dict):
             payload=json_data,
             exc=e
         )
+
+
+# =====================================================
+# GET MESSAGES BY ROOM ID
+# =====================================================
+def GettblChatMessageByChatRoomId1(json_data: dict):
+    try:
+        room_id = json_data.get("intChatRoomId")
+        if not room_id:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": "intChatRoomId is required", "data": []}
+            )
+
+        rows = GettblChatMessageByChatRoomId(room_id)
+        result = [jsonable_encoder(to_json(r, r.id)) for r in rows if r]
+
+        return JSONResponse(
+            status_code=200,
+            content={"status": "success", "message": "Messages fetched successfully", "data": result}
+        )
+
+    except Exception as e:
+        log_exception(file_name="tblChat_contract", function_name="GettblChatMessageByChatRoomId1", payload=json_data, exc=e)
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e), "data": []})
+
+
+# =====================================================
+# GET CHAT ROOMS BY USER
+# =====================================================
+def GettblChatRoomByCreatedBy1(json_data: dict):
+    try:
+        user_id = json_data.get("intCreatedBy")
+        if not user_id:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": "intCreatedBy is required", "data": []}
+            )
+
+        rows = GettblChatRoomByCreatedBy(user_id)
+        result = [jsonable_encoder(to_json(r, r.id)) for r in rows if r]
+
+        return JSONResponse(
+            status_code=200,
+            content={"status": "success", "message": "Chat rooms fetched successfully", "data": result}
+        )
+
+    except Exception as e:
+        log_exception(file_name="tblChat_contract", function_name="GettblChatRoomByCreatedBy1", payload=json_data, exc=e)
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e), "data": []})

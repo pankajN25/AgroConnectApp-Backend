@@ -154,7 +154,9 @@ from tblChat_contract import (
     GettblChatMessage1,
     savetblChatMessage1,
     edittblChatMessage1,
-    deletetblChatMessage1
+    deletetblChatMessage1,
+    GettblChatMessageByChatRoomId1,
+    GettblChatRoomByCreatedBy1,
 )
 
 # ================= Direct Messaging =================
@@ -636,6 +638,14 @@ async def edittblChatMessage(request: Request):
 @app.post("/deletetblChatMessage")
 async def deletetblChatMessage(request: Request):
     return deletetblChatMessage1(await request.json())
+
+@app.post("/GettblChatMessageByChatRoomId")
+async def GettblChatMessageByChatRoomId(request: Request):
+    return GettblChatMessageByChatRoomId1(await request.json())
+
+@app.post("/GettblChatRoomByCreatedBy")
+async def GettblChatRoomByCreatedBy(request: Request):
+    return GettblChatRoomByCreatedBy1(await request.json())
 
 # ==================== DIRECT MESSAGING ====================
 @app.post("/SendDirectMessage")
