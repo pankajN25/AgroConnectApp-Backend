@@ -6,7 +6,16 @@ from CommonFunction import *
 
 def send_direct_message1(json_data: dict):
     try:
-        msg = savetblDirectMessage(json_data)
+        # Frontend sends: sender_id / receiver_id / message
+        # Model columns:  intSenderId / intReceiverId / nvcharMessage
+        payload = {
+            "intSenderId":   json_data.get("sender_id") or json_data.get("intSenderId"),
+            "intReceiverId": json_data.get("receiver_id") or json_data.get("intReceiverId"),
+            "nvcharMessage": json_data.get("message") or json_data.get("nvcharMessage"),
+        }
+        if not payload["intSenderId"] or not payload["intReceiverId"] or not payload["nvcharMessage"]:
+            return JSONResponse(status_code=400, content={"status": "error", "message": "sender_id, receiver_id and message are required", "data": {}})
+        msg = savetblDirectMessage(payload)
         if not msg:
             return JSONResponse(status_code=500, content={"status": "error", "message": "Failed to send message", "data": {}})
         return JSONResponse(status_code=200, content=jsonable_encoder({"status": "success", "message": "message sent", "data": to_json(msg, msg.id)}))

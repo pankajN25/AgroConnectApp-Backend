@@ -114,7 +114,9 @@ def savetblDirectMessage(JsonString):
             existing.syncUpdate()
             return existing
         else:
-            return tblDirectMessage(**obj)
+            msg = tblDirectMessage(**obj)
+            msg.sync()
+            return msg
 
     except Exception as e:
         log_exception(
