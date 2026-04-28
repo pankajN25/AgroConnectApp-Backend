@@ -20,22 +20,27 @@ def _get_razorpay_client():
 # =====================================================
 def create_razorpay_order(json_data: dict):
     try:
+        key_id = os.environ.get("RAZORPAY_KEY_ID", "")
         client = _get_razorpay_client()
-        amount = int(float(json_data.get("amount", 0)) * 100)  # convert to paise
+
+        # Frontend already sends amount in paise — do NOT multiply by 100 again
+        amount = int(float(json_data.get("amount", 0)))
         if amount <= 0:
             return JSONResponse(status_code=400, content={"status": "error", "message": "Invalid amount", "data": {}})
 
         order = client.order.create({
             "amount": amount,
-            "currency": "INR",
+            "currency": json_data.get("currency", "INR"),
+            "receipt": json_data.get("receipt", ""),
+            "notes": json_data.get("notes", {}),
             "payment_capture": 1,
-            "notes": {
-                "intFarmerId": str(json_data.get("intFarmerId", "")),
-                "intBuyerId": str(json_data.get("intBuyerId", "")),
-                "intCropId": str(json_data.get("intCropId", "")),
-            }
         })
-        return JSONResponse(status_code=200, content={"status": "success", "message": "Razorpay order created", "data": order})
+        # Include keyId so frontend can open Razorpay checkout without hardcoding the key
+        return JSONResponse(status_code=200, content={
+            "status": "success",
+            "message": "Razorpay order created",
+            "data": {**order, "keyId": key_id},
+        })
 
     except ValueError as ve:
         return JSONResponse(status_code=500, content={"status": "error", "message": str(ve), "data": {}})
@@ -68,19 +73,21 @@ def verify_payment_and_create_order(json_data: dict):
             return JSONResponse(status_code=400, content={"status": "error", "message": "Payment signature verification failed", "data": {}})
 
         # Save order to DB
+        # Frontend sends order fields nested inside { order: { intFarmerId, ... } }
         from tblOrder_Repository import savetblOrder
         from CommonFunction import to_json
 
+        order_src = json_data.get("order") or json_data
         order_payload = {
-            "intFarmerId":         json_data.get("intFarmerId"),
-            "intCropId":           json_data.get("intCropId"),
-            "intBuyerId":          json_data.get("intBuyerId"),
-            "intQuantity":         json_data.get("intQuantity"),
-            "intUnitPrice":        json_data.get("intUnitPrice"),
-            "intTotalPrice":       json_data.get("intTotalPrice"),
-            "nvcharDeliveryAddress": json_data.get("nvcharDeliveryAddress", ""),
-            "nvcharOrderNumber":   razorpay_order_id,
-            "nvcharStatus":        "paid",
+            "intFarmerId":           order_src.get("intFarmerId"),
+            "intCropId":             order_src.get("intCropId"),
+            "intBuyerId":            order_src.get("intBuyerId"),
+            "intQuantity":           order_src.get("intQuantity"),
+            "intUnitPrice":          order_src.get("intUnitPrice"),
+            "intTotalPrice":         order_src.get("intTotalPrice"),
+            "nvcharDeliveryAddress": order_src.get("nvcharDeliveryAddress", ""),
+            "nvcharOrderNumber":     razorpay_order_id,
+            "nvcharStatus":          "paid",
         }
         saved_order = savetblOrder(order_payload)
 
