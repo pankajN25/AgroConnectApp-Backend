@@ -87,7 +87,9 @@ def verify_payment_and_create_order(json_data: dict):
             "intTotalPrice":         order_src.get("intTotalPrice"),
             "nvcharDeliveryAddress": order_src.get("nvcharDeliveryAddress", ""),
             "nvcharOrderNumber":     razorpay_order_id,
-            "nvcharStatus":          "paid",
+            # Use "Pending" so the farmer sees it in the Pending tab.
+            # Payment status is tracked separately in tblTransaction.
+            "nvcharStatus":          "Pending",
         }
         saved_order = savetblOrder(order_payload)
 
@@ -112,16 +114,19 @@ def create_cod_order(json_data: dict):
         from tblOrder_Repository import savetblOrder
         from CommonFunction import to_json
 
+        # Frontend wraps order fields inside { order: { intFarmerId, ... } }
+        order_src = json_data.get("order") or json_data
         order_payload = {
-            "intFarmerId":           json_data.get("intFarmerId"),
-            "intCropId":             json_data.get("intCropId"),
-            "intBuyerId":            json_data.get("intBuyerId"),
-            "intQuantity":           json_data.get("intQuantity"),
-            "intUnitPrice":          json_data.get("intUnitPrice"),
-            "intTotalPrice":         json_data.get("intTotalPrice"),
-            "nvcharDeliveryAddress": json_data.get("nvcharDeliveryAddress", ""),
-            "nvcharOrderNumber":     f"COD-{uuid.uuid4().hex[:8].upper()}",
-            "nvcharStatus":          "cod_pending",
+            "intFarmerId":           order_src.get("intFarmerId"),
+            "intCropId":             order_src.get("intCropId"),
+            "intBuyerId":            order_src.get("intBuyerId"),
+            "intQuantity":           order_src.get("intQuantity"),
+            "intUnitPrice":          order_src.get("intUnitPrice"),
+            "intTotalPrice":         order_src.get("intTotalPrice"),
+            "nvcharDeliveryAddress": order_src.get("nvcharDeliveryAddress", ""),
+            "nvcharOrderNumber":     order_src.get("nvcharOrderNumber") or f"COD-{uuid.uuid4().hex[:8].upper()}",
+            # Use "Pending" so the farmer sees it in the Pending tab.
+            "nvcharStatus":          "Pending",
         }
         saved_order = savetblOrder(order_payload)
 

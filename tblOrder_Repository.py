@@ -127,7 +127,9 @@ def savetblOrder(JsonString):
             existing.syncUpdate()
             return existing
         else:
-            return tblOrder(**obj)
+            order = tblOrder(**obj)
+            order.sync()
+            return order
 
     except Exception as e:
         log_exception(
