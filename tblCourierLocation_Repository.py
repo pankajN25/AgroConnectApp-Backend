@@ -169,6 +169,64 @@ def deletetblCourierLocation(JsonString):
 
 
 # =====================================================
+# UPSERT COURIER LOCATION BY ORDER ID
+# Creates a new record if none exists for the order; updates the latest one.
+# =====================================================
+def UpsertCourierLocationByOrderId(intOrderId, floatLatitude, floatLongitude):
+    try:
+        existing = list(tblCourierLocation.select(
+            AND(
+                tblCourierLocation.q.intOrderId == intOrderId,
+                tblCourierLocation.q.ynDeleted == False
+            )
+        ))
+        if existing:
+            loc = existing[0]
+            loc.floatLatitude = floatLatitude
+            loc.floatLongitude = floatLongitude
+            loc.dtUpdatedDatetime = datetime.now()
+            return loc
+        return tblCourierLocation(
+            intOrderId=intOrderId,
+            floatLatitude=floatLatitude,
+            floatLongitude=floatLongitude,
+        )
+    except Exception as e:
+        log_exception(
+            file_name="tblCourierLocation_Repository",
+            function_name="UpsertCourierLocationByOrderId",
+            payload={"intOrderId": intOrderId},
+            exc=e
+        )
+        return None
+
+
+# =====================================================
+# GET LATEST COURIER LOCATION BY ORDER ID
+# Returns only the single most-recent record.
+# =====================================================
+def GetLatestCourierLocationByOrderId(intOrderId):
+    try:
+        rows = list(tblCourierLocation.select(
+            AND(
+                tblCourierLocation.q.intOrderId == intOrderId,
+                tblCourierLocation.q.ynDeleted == False
+            )
+        ))
+        if not rows:
+            return None
+        return max(rows, key=lambda x: x.dtUpdatedDatetime or datetime.min)
+    except Exception as e:
+        log_exception(
+            file_name="tblCourierLocation_Repository",
+            function_name="GetLatestCourierLocationByOrderId",
+            payload={"intOrderId": intOrderId},
+            exc=e
+        )
+        return None
+
+
+# =====================================================
 # CREATE TABLE
 # =====================================================
 sqlhub.processConnection = connectionForURI('sqlite:./world.sqlite3')

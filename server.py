@@ -320,7 +320,9 @@ from tblCourierLocation_contract import (
     GetCourierLocationsByOrderId,
     SaveCourierLocation,
     EditCourierLocation,
-    DeleteCourierLocation
+    DeleteCourierLocation,
+    UpdateLiveCourierLocation,
+    GetLatestCourierLocation,
 )
 
 # ================= Support Ticket Management =================
@@ -991,6 +993,14 @@ async def edittblCourierLocation(request: Request):
 @app.post("/deletetblCourierLocation")
 async def deletetblCourierLocation(request: Request):
     return DeleteCourierLocation(await request.json())
+
+@app.post("/UpdateLiveCourierLocation")
+async def update_live_courier_location(request: Request):
+    return UpdateLiveCourierLocation(await request.json())
+
+@app.post("/GetLatestCourierLocation")
+async def get_latest_courier_location(request: Request):
+    return GetLatestCourierLocation(await request.json())
 
 
 # ==================== SUPPORT TICKET MANAGEMENT ====================
