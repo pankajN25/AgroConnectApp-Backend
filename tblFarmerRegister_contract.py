@@ -334,6 +334,81 @@ def edittblFarmerRegister1(json_data: dict):
         )
 
 
+def ChangeFarmerPassword1(json_data: dict):
+    try:
+        farmer_id = json_data.get("id")
+        current_password = str(json_data.get("currentPassword") or "")
+        new_password = str(json_data.get("newPassword") or "")
+
+        if not farmer_id:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": "id required", "data": {}}
+            )
+
+        if not current_password or not new_password:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",
+                    "message": "Current password and new password are required",
+                    "data": {},
+                }
+            )
+
+        if len(new_password) < 6:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",
+                    "message": "New password must be at least 6 characters long",
+                    "data": {},
+                }
+            )
+
+        if current_password == new_password:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",
+                    "message": "New password must be different from current password",
+                    "data": {},
+                }
+            )
+
+        result = ChangeFarmerPassword(farmer_id, current_password, new_password)
+
+        if not result.get("ok"):
+            message = result.get("message") or "Could not change password"
+            status_code = 400 if message == "Current password is incorrect" else 404 if message == "Farmer not found" else 500
+            return JSONResponse(
+                status_code=status_code,
+                content={"status": "error", "message": message, "data": {}}
+            )
+
+        farmer = result["farmer"]
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "success",
+                "message": "Password changed successfully",
+                "data": jsonable_encoder(to_json(farmer, farmer.id)),
+            }
+        )
+
+    except Exception as e:
+        log_exception(
+            file_name="tblFarmerRegister_contract",
+            function_name="ChangeFarmerPassword1",
+            payload=json_data,
+            exc=e
+        )
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": str(e), "data": {}}
+        )
+
+
 # =====================================================
 # DELETE
 # =====================================================

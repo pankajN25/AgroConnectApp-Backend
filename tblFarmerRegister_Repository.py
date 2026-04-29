@@ -106,6 +106,33 @@ def GettblFarmerRegisterCount():
 #         )
 
 
+def ChangeFarmerPassword(farmer_id, current_password, new_password):
+    try:
+        farmer = tblFarmerRegister.get(farmer_id)
+
+        if farmer.ynDeleted:
+            return {"ok": False, "message": "Farmer not found"}
+
+        existing_password = str(farmer.nvcharPassword or "")
+        if existing_password != str(current_password or ""):
+            return {"ok": False, "message": "Current password is incorrect"}
+
+        farmer.nvcharPassword = str(new_password or "")
+        farmer.dtDateofModification = datetime.now()
+        farmer.syncUpdate()
+
+        return {"ok": True, "farmer": farmer}
+
+    except Exception as e:
+        log_exception(
+            file_name="tblFarmerRegisterRepository",
+            function_name="ChangeFarmerPassword",
+            payload={"farmer_id": farmer_id},
+            exc=e
+        )
+        return {"ok": False, "message": str(e)}
+
+
 # =====================================================
 # GET FARMER BY CITY
 # =====================================================

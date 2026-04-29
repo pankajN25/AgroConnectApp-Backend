@@ -84,6 +84,7 @@ from tblFarmerRegister_contract import (
     GettblFarmerRegisterByCityId1,
     GettblFarmerRegisterByintstateId1,
     GettblFarmerRegisterByintcountryId1,
+    ChangeFarmerPassword1,
     uploadtblFarmerRegisterProfilePictureWithMeta1,
     savetblFarmerRegister1,
     edittblFarmerRegister1,
@@ -97,6 +98,7 @@ from tblFarmerRegister_contract import (
 from tblBuyerRegister_contract import (
     GettblBuyerRegister1,
     GettblBuyerRegisterById1,
+    ChangeBuyerPassword1,
     uploadtblBuyerRegisterProfilePictureWithMeta1,
     savetblBuyerRegister1,
     edittblBuyerRegister1,
@@ -474,6 +476,11 @@ async def savetblFarmerRegister(request: Request):
 @app.post("/edittblFarmerRegister")
 async def edittblFarmerRegister(request: Request):
     return edittblFarmerRegister1(await request.json())
+
+
+@app.post("/ChangeFarmerPassword")
+async def ChangeFarmerPassword(request: Request):
+    return ChangeFarmerPassword1(await request.json())
 
 
 @app.post("/deletetblFarmerRegister")
@@ -1031,6 +1038,11 @@ async def savetblBuyerRegister(request: Request):
 @app.post("/edittblBuyerRegister")
 async def edittblBuyerRegister(request: Request):
     return edittblBuyerRegister1(await request.json())
+
+
+@app.post("/ChangeBuyerPassword")
+async def ChangeBuyerPassword(request: Request):
+    return ChangeBuyerPassword1(await request.json())
 
 
 @app.post("/deletetblBuyerRegister")

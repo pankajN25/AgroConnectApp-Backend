@@ -67,6 +67,33 @@ def GettblBuyerRegisterById(buyerId):
         return None
 
 
+def ChangeBuyerPassword(buyer_id, current_password, new_password):
+    try:
+        buyer = tblBuyerRegister.get(buyer_id)
+
+        if buyer.ynDeleted:
+            return {"ok": False, "message": "Buyer not found"}
+
+        existing_password = str(buyer.nvcharPassword or "")
+        if existing_password != str(current_password or ""):
+            return {"ok": False, "message": "Current password is incorrect"}
+
+        buyer.nvcharPassword = str(new_password or "")
+        buyer.dtModifyDatetime = datetime.now()
+        buyer.syncUpdate()
+
+        return {"ok": True, "buyer": buyer}
+
+    except Exception as e:
+        log_exception(
+            file_name="tblBuyerRegister_Repository",
+            function_name="ChangeBuyerPassword",
+            payload={"buyer_id": buyer_id},
+            exc=e
+        )
+        return {"ok": False, "message": str(e)}
+
+
 # =====================================================
 # SAVE BUYER
 # =====================================================

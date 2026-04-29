@@ -104,7 +104,9 @@ def savetblFarmerRating(JsonString):
 
             return obj
 
-        return tblFarmerRating(**JsonString)
+        rating = tblFarmerRating(**JsonString)
+        rating.sync()
+        return rating
 
     except Exception as e:
 
